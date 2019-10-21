@@ -1,7 +1,7 @@
-from ptt.items import PttItem,PttContent #從ptt.Items 繼承PttItem、PttContent
-from bs4 import BeautifulSoup 
 import scrapy
 import time
+from bs4 import BeautifulSoup
+from ptt.items import PttContent, PttItem  # 從ptt.Items 繼承PttItem、PttContent
 
 id_count = 1
 main_content = ''
@@ -28,7 +28,7 @@ class PttSpider(scrapy.Spider):
 
     def parse_article(self,response):
         global id_count
-
+        
         item = PttItem()
         target = response.css("div.r-ent")
         #print('count is '+str(len(target)))
@@ -43,8 +43,8 @@ class PttSpider(scrapy.Spider):
                 item['push'] = tag.css("span::text")[0].extract()
                 item['url'] = 'https://www.ptt.cc'+tag.css("div.title a::attr(href)")[0].extract()
                 item['category'] = 0
-
                 
+
                 yield scrapy.Request(item['url'],callback=self.get_content,meta = {'content_id' : item['id']})
                 yield item #yield將函數定義為generator的函數 可使用迭代的方式取出結果的值  詳細見https://liam.page/2017/06/30/understanding-yield-in-python/
             except IndexError:
@@ -102,5 +102,3 @@ class PttSpider(scrapy.Spider):
         item['push_count'] = push_count
         item['content_id'] = response.meta['content_id']
         return item
-
-        
