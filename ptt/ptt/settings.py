@@ -73,6 +73,7 @@ MYSQL_DB = 'crawl'           #改成您的Mysql資料庫
 MYSQL_USER = 'root'       #改成您的Mysql資料庫使用者帳號
 MYSQL_PASS = '875487'           #改成您的Mysql資料庫使用者密碼
 
+REQUEST_RETRY_MAX = 10
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

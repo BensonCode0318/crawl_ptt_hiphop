@@ -1,6 +1,8 @@
 import scrapy
 import time
 from bs4 import BeautifulSoup
+from scrapy.exceptions import CloseSpider
+from scrapy.http import FormRequest
 from ptt.items import PttContent, PttItem  # 從ptt.Items 繼承PttItem、PttContent
 
 id_count = 1
@@ -9,7 +11,31 @@ main_content = ''
 class PttSpider(scrapy.Spider):
     name = "ptt"
     allowed_domains = ['ptt.cc']
-    start_urls = ['https://www.ptt.cc/bbs/Hip-Hop/index.html']
+
+    def __init__(self,
+                 board='Hip-Hop',
+                 pages=None,
+                 *args,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+
+            # const
+        start_url = ''
+        self._domain = 'https://www.ptt.cc'
+        self._cookies = {'over18': '1'}
+        self.board = board
+        self.pages = None
+
+        start_url = '{}/bbs/{}/index.html'.format(self._domain, self.board)
+        self.start_urls = [start_url]
+
+        if pages:
+            page_index = pages.split(',')
+            page_index = list(map(str.strip, page_index))
+            if len(page_index) == 2 and all([i.isdigit() or i == '-1' for i in page_index]):
+                self.pages = (int(page_index[0]), int(page_index[1]))
+
+
 
     #建立一個 Class 繼承 scrapy.Spider（Scrapy 裡一個基本的 spider class），裡面包含三個屬性：
     #name (爬蟲命名)
@@ -17,14 +43,36 @@ class PttSpider(scrapy.Spider):
     #start_urls (起始網址) ：將從這裡定義的網址抓取，允許多個
 
     def parse(self, response):
-        web_count = response.css("a.btn.wide::attr(href)")[1].extract()
-        web_count = 1+int(''.join(list(filter(str.isdigit,web_count)))) #取出url中的數字連結 此為倒數第二頁連結 需要將數字加1才是最後一頁連結
-        #print(int(web_count))
 
-        for i in range(10):
-            time.sleep(1)
-            url='https://www.ptt.cc/bbs/Hip-Hop/index' + str(web_count-i) +'.html'
-            yield scrapy.Request(url,callback=self.parse_article)
+        if len(response.xpath('//div[@class="over18-notice"]')) > 0:
+            requests_retries = 0
+            if requests_retries < self.settings.attributes['REQUEST_RETRY_MAX'].value:
+                requests_retries += 1
+                self.logger.warning('Retry {} times'.format(requests_retries))
+                yield FormRequest.from_response(
+                    response,
+                    formdata={'yes': 'yes'},
+                    callback=self.parse,
+                    dont_filter=True)
+            else:
+                self.logger.error('You cannot pass')
+                raise CloseSpider('You cannot pass over18-form')
+        
+
+        if self.pages:
+            begin_index, end_index = self.pages
+            for i in range(begin_index, end_index + 1):
+                time.sleep(1)
+                url = '{}/bbs/{}/index{}.html'.format(self._domain, self.board, i)
+                yield scrapy.Request(url,callback=self.parse_article)
+        else:
+            web_count = response.css("a.btn.wide::attr(href)")[1].extract()
+            web_count = 1+int(''.join(list(filter(str.isdigit,web_count)))) #取出url中的數字連結 此為倒數第二頁連結 需要將數字加1才是最後一頁連結
+            for i in range(1 , web_count):
+                time.sleep(1)
+                url = '{}/bbs/{}/index{}.html'.format(self._domain, self.board, i)
+                yield scrapy.Request(url,callback=self.parse_article)
+
 
     def parse_article(self,response):
         global id_count
