@@ -9,6 +9,8 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+import datetime
+
 BOT_NAME = 'ptt'
 
 SPIDER_MODULES = ['ptt.spiders']
@@ -74,6 +76,12 @@ MYSQL_USER = 'root'       #改成您的Mysql資料庫使用者帳號
 MYSQL_PASS = '875487'           #改成您的Mysql資料庫使用者密碼
 
 REQUEST_RETRY_MAX = 10
+
+LOG_LEVEL = 'DEBUG'
+to_day = datetime.datetime.now()
+log_file_path = 'log/scrapy_{}_{}_{}.log'.format(to_day.year, to_day.month, to_day.day)
+LOG_FILE = log_file_path
+#f=open(LOG_FILE, 'w')
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

@@ -86,10 +86,11 @@ class PttSpider(scrapy.Spider):
                 item['id'] = id_count
                 id_count += 1
                 item['title'] = tag.css("div.title a::text")[0].extract() #extract() 為提取真實原文數據
+                item['title'] = item['title'].replace("'","''")
                 item['authour'] = tag.css("div.author::text")[0].extract()
                 item['date'] = tag.css("div.date::text")[0].extract()
                 item['push'] = tag.css("span::text")[0].extract()
-                item['url'] = 'https://www.ptt.cc'+tag.css("div.title a::attr(href)")[0].extract()
+                item['url'] = "https://www.ptt.cc"+tag.css("div.title a::attr(href)")[0].extract()
                 item['category'] = 0
                 
 
@@ -124,12 +125,13 @@ class PttSpider(scrapy.Spider):
 
             # remove ':'
             push_content = ' '.join(push_content)[1:].strip(' \t\n\r')
+            push_content = push_content.replace("'","''").replace("\\"," ")
             push_ipdatetime = push.find('span', 'push-ipdatetime').string.strip(' \t\n\r')
             messages.append({
-                'push_tag': push_tag,
-                'push_userid': push_userid,
-                'push_content': push_content,
-                'push_ipdatetime': push_ipdatetime
+                "push_tag": push_tag,
+                "push_userid": push_userid,
+                "push_content": push_content,
+                "push_ipdatetime": push_ipdatetime
             })
             if push_tag == u'推':
                 p += 1
@@ -140,10 +142,10 @@ class PttSpider(scrapy.Spider):
 
         # count: 推噓文相抵後的數量; all: 推文總數
         push_count = {
-            'all': p + b + n,
-            'count': p - b,
-            'push': p,
-            'boo': b,
+            "all": p + b + n,
+            "count": p - b,
+            "push": p,
+            "boo": b,
             "neutral": n
         }  
         item['push_message'] = messages
