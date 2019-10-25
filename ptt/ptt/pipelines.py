@@ -22,6 +22,7 @@ class PttPipeline(object):
         self.sort_count = []
         self.authour_name = []
         self.authour_contain = []
+        self.board = ''
         #self.sort_count = numpy.zeros(12)
         self.cursor = self.connect.cursor()
 
@@ -29,7 +30,7 @@ class PttPipeline(object):
     def process_item(self, item, spider):
         add_punc='，。、【】“”：；（）﹙﹚［］《》〈〉‘’{}？！⑦()、%^>℃：.”“^-——=&#@￥「」※◆*●～–｜▶‧／◎\n－♥\u3000'
         punctuation = string.punctuation+add_punc
-
+        self.board = item['board']
         #判斷item是不是已經存在資料庫中
         select_sql = "SELECT * FROM data WHERE url = '%s'" % (item['url'])
         self.cursor.execute(select_sql)
@@ -76,7 +77,7 @@ class PttPipeline(object):
 
     def close_spider(self, spider):
         for count in range(len(self.sort)):
-            update_sql = "INSERT INTO category(name, count) VALUES ('%s', '%d')" % (self.sort[count], self.sort_count[count])
+            update_sql = "INSERT INTO category(name, count, board) VALUES ('%s', '%d', '%s')" % (self.sort[count], self.sort_count[count], self.board)
             self.cursor.execute(update_sql)
             self.connect.commit()
 
