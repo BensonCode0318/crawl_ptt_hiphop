@@ -14,7 +14,7 @@ class PttItem(scrapy.Item):
     id = scrapy.Field() #文章id
     title = scrapy.Field() #文章標題
     authour = scrapy.Field() #作者
-    item_date = scrapy.Field() #日期
+    #item_date = scrapy.Field() #日期
     push = scrapy.Field() #推虛文數
     url = scrapy.Field() #URL網址
     category = scrapy.Field() #文章分類

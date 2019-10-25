@@ -24,7 +24,6 @@ class PttPipeline(object):
         self.authour_contain = []
         #self.sort_count = numpy.zeros(12)
         self.cursor = self.connect.cursor()
-        
 
 
     def process_item(self, item, spider):
@@ -47,7 +46,7 @@ class PttPipeline(object):
                 #self.sort_count[11] += 1
                 item['category'] = self.sort.index(item_title[0:2])+1
             #insert data
-            insert_sql = "INSERT INTO data(authour, category, date, push, title, url, board) VALUES ('%s', '%d', '%s', '%s', '%s', '%s', '%s')" % (item['authour'], item['category'], item['item_date'], item['push'], item['title'], item['url'], item['board'])
+            insert_sql = "INSERT INTO data(authour, category, date, push, title, url, board) VALUES ('%s', '%d', '%s', '%s', '%s', '%s', '%s')" % (item['authour'], item['category'], item['date'], item['push'], item['title'], item['url'], item['board'])
             self.cursor.execute(insert_sql)
             insert_id = self.connect.insert_id()
             self.connect.commit()
@@ -66,7 +65,7 @@ class PttPipeline(object):
             item['content'] = "".join(item['content'])
             item['content'] = item['content'].translate(str.maketrans('','',punctuation)) #去除標點與特殊字符
 
-            insert_sql = "INSERT INTO content(content_id, full_content, push_count, push_message, date) VALUES ('%d', '%s', '%s', '%s', '%s')" % (insert_id, item['content'], json.dumps(item['push_count'], ensure_ascii=False), json.dumps(item['push_message'], ensure_ascii=False), item['date'])
+            insert_sql = "INSERT INTO content(content_id, full_content, push_count, push_message) VALUES ('%d', '%s', '%s', '%s')" % (insert_id, item['content'], json.dumps(item['push_count'], ensure_ascii=False), json.dumps(item['push_message'], ensure_ascii=False))
             self.cursor.execute(insert_sql)
             self.connect.commit()
         else:

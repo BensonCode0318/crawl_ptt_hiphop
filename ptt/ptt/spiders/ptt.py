@@ -101,13 +101,13 @@ class PttSpider(scrapy.Spider):
 
                 item['url'] = "https://www.ptt.cc"+tag.css("div.title a::attr(href)")[0].extract()
                 item['authour'] = tag.css("div.author::text")[0].extract()
-                item['item_date'] = tag.css("div.date::text")[0].extract()
+                #item['item_date'] = tag.css("div.date::text")[0].extract()
                 item['board'] = self.board
 
                 meta = {
                     'title':item['title'],
                     'authour':item['authour'],
-                    'item_date':item['item_date'],
+                    #'item_date':item['item_date'],
                     'push':item['push'],
                     'url':item['url'] ,
                     'category':0,
@@ -178,7 +178,7 @@ class PttSpider(scrapy.Spider):
         final_item = {
             'title':meta['title'],
             'authour':meta['authour'],
-            'item_date':meta['item_date'],
+            #'item_date':meta['item_date'],
             'push':meta['push'],
             'url':meta['url'] ,
             'category':0,
