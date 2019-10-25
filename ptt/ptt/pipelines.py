@@ -23,13 +23,12 @@ class PttPipeline(object):
         self.authour_name = []
         self.authour_contain = []
         self.board = ''
-        #self.sort_count = numpy.zeros(12)
+        self.add_punc='，。、【】“”：；（）﹙﹚［］《》〈〉‘’{}？！⑦()、%^>℃：.”“^-——=&#@￥「」※◆*●～–｜▶‧／◎\n－♥\u3000'
+        self.punctuation = string.punctuation+self.add_punc
         self.cursor = self.connect.cursor()
 
 
     def process_item(self, item, spider):
-        add_punc='，。、【】“”：；（）﹙﹚［］《》〈〉‘’{}？！⑦()、%^>℃：.”“^-——=&#@￥「」※◆*●～–｜▶‧／◎\n－♥\u3000'
-        punctuation = string.punctuation+add_punc
         self.board = item['board']
         #判斷item是不是已經存在資料庫中
         select_sql = "SELECT * FROM data WHERE url = '%s'" % (item['url'])
@@ -37,7 +36,7 @@ class PttPipeline(object):
         results = self.cursor.fetchall()  
 
         if len(results) is 0:
-            item_title = item['title'].translate(str.maketrans('','',punctuation))
+            item_title = item['title'].translate(str.maketrans('','',self.punctuation))
             try:
                 self.sort_count[self.sort.index(item_title[0:2])] += 1
                 item['category'] = self.sort.index(item_title[0:2])+1
@@ -64,7 +63,7 @@ class PttPipeline(object):
             while '\n' in item['content']:
                 item['content'].remove('\n')
             item['content'] = "".join(item['content'])
-            item['content'] = item['content'].translate(str.maketrans('','',punctuation)) #去除標點與特殊字符
+            item['content'] = item['content'].translate(str.maketrans('','',self.punctuation)) #去除標點與特殊字符
 
             insert_sql = "INSERT INTO content(content_id, full_content, push_count, push_message) VALUES ('%d', '%s', '%s', '%s')" % (insert_id, item['content'], json.dumps(item['push_count'], ensure_ascii=False), json.dumps(item['push_message'], ensure_ascii=False))
             self.cursor.execute(insert_sql)
