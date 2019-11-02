@@ -82,7 +82,7 @@ class PttPipeline(object):
 
         for index in range(len(self.authour_name)):
             contain = ','.join(self.authour_contain[index])
-            sql = "INSERT INTO authour(authour_name, authour_contain) VALUES ('%s', '%s')" % (self.authour_name[index], contain)
+            sql = "INSERT INTO authour(authour_name, authour_contain, board) VALUES ('%s', '%s', '%s')" % (self.authour_name[index], contain, self.board)
             self.cursor.execute(sql)
             self.connect.commit()
 
