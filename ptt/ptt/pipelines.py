@@ -27,6 +27,26 @@ class PttPipeline(object):
         self.punctuation = string.punctuation+self.add_punc
         self.cursor = self.connect.cursor()
 
+    #     count_sql = "SELECT MAX(id) From category"
+    #     self.cursor.execute(count_sql)
+    #     self.category_count = self.cursor.fetchone()[0]
+
+
+
+
+    # def authour_process(self,board):
+    #     category_sql = "SELECT id,name,count FROM category WHERE board = '%s'"% (board)
+    #     self.cursor.execute(category_sql)
+    #     category_result = self.cursor.fetchall()
+
+    #     if len(category_result) is not 0:
+    #         for result in category_result:
+    #             self.sort_id.append(result[0])
+    #             self.sort.append(result[1])
+    #             self.sort_count.append(result[2])
+    #         self.flag = 1
+
+
 
     def process_item(self, item, spider):
         self.board = item['board']
@@ -35,6 +55,10 @@ class PttPipeline(object):
         self.cursor.execute(select_sql)
         results = self.cursor.fetchall()  
 
+        # if self.flag is 0:
+        #     self.authour_process(self.board)
+
+                
         if len(results) is 0:
             item_title = item['title'].translate(str.maketrans('','',self.punctuation))
             try:
@@ -43,7 +67,6 @@ class PttPipeline(object):
             except ValueError:
                 self.sort.append(item_title[0:2])
                 self.sort_count.append(1)
-                #self.sort_count[11] += 1
                 item['category'] = self.sort.index(item_title[0:2])+1
             #insert data
             insert_sql = "INSERT INTO data(authour, category, date, push, title, url, board) VALUES ('%s', '%d', '%s', '%s', '%s', '%s', '%s')" % (item['authour'], item['category'], item['date'], item['push'], item['title'], item['url'], item['board'])
@@ -60,12 +83,16 @@ class PttPipeline(object):
                 self.authour_contain[self.authour_name.index(item['authour'])].append(str(insert_id))
 
             #insert content
-            while '\n' in item['content']:
-                item['content'].remove('\n')
+            # while '\n' in item['content']:
+                # item['content'].remove('\n')
             item['content'] = "".join(item['content'])
-            item['content'] = item['content'].translate(str.maketrans('','',self.punctuation)) #去除標點與特殊字符
+            item['content'] = item['content'].replace("\'","''").replace("\\"," ").replace("\""," ")
+            # item['content'] = item['content'].translate(str.maketrans('','',self.punctuation)) #去除標點與特殊字符
 
-            insert_sql = "INSERT INTO content(content_id, full_content, push_count, push_message) VALUES ('%d', '%s', '%s', '%s')" % (insert_id, item['content'], json.dumps(item['push_count'], ensure_ascii=False), json.dumps(item['push_message'], ensure_ascii=False))
+            item['push_message'] =  json.dumps(item['push_message'], ensure_ascii=False)
+            # item['push_message'] = item['push_message'].strip('[').strip(']')
+
+            insert_sql = "INSERT INTO content(content_id, full_content, push_count, push_message) VALUES ('%d', '%s', '%s', '%s')" % (insert_id, item['content'], json.dumps(item['push_count'], ensure_ascii=False),item['push_message'])
             self.cursor.execute(insert_sql)
             self.connect.commit()
         else:

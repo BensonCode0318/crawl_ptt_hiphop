@@ -123,7 +123,7 @@ class PttSpider(scrapy.Spider):
         meta = response.meta
         item = PttItem()
         target = response.css("body")
-        item['content'] = target.css("div#main-content::text").extract()
+        item['content'] = target.css("div#main-content::text , div#main-content a::attr(href)").extract()
         item['date'] = target.css("div.article-metaline span.article-meta-value::text")[2].extract()
         item['date'] = str(datetime.datetime.strptime(item['date'],'%a %b %d %H:%M:%S %Y'))
 
@@ -147,7 +147,7 @@ class PttSpider(scrapy.Spider):
 
             # remove ':'
             push_content = ' '.join(push_content)[1:].strip(' \t\n\r')
-            push_content = push_content.replace("'","''").replace("\\"," ")
+            push_content = push_content.replace("\'","''").replace("\\"," ").replace("\""," ")
             push_ipdatetime = push.find('span', 'push-ipdatetime').string.strip(' \t\n\r')
             messages.append({
                 "push_tag": push_tag,
